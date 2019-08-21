@@ -1,0 +1,760 @@
+<?php
+/**
+ * wordpress-learning functions and definitions
+ *
+ * @link https://developer.wordpress.org/themes/basics/theme-functions/
+ *
+ * @package wordpress-learning
+ */
+
+if ( ! function_exists( 'wordpress_learning_setup' ) ) :
+	/**
+	 * Sets up theme defaults and registers support for various WordPress features.
+	 *
+	 * Note that this function is hooked into the after_setup_theme hook, which
+	 * runs before the init hook. The init hook is too late for some features, such
+	 * as indicating support for post thumbnails.
+	 */
+	function wordpress_learning_setup() {
+		/*
+		 * Make theme available for translation.
+		 * Translations can be filed in the /languages/ directory.
+		 * If you're building a theme based on wordpress-learning, use a find and replace
+		 * to change 'wordpress-learning' to the name of your theme in all the template files.
+		 */
+		load_theme_textdomain( 'wordpress-learning', get_template_directory() . '/languages' );
+
+		// Add default posts and comments RSS feed links to head.
+		add_theme_support( 'automatic-feed-links' );
+
+		/*
+		 * Let WordPress manage the document title.
+		 * By adding theme support, we declare that this theme does not use a
+		 * hard-coded <title> tag in the document head, and expect WordPress to
+		 * provide it for us.
+		 */
+		add_theme_support( 'title-tag' );
+
+		/*
+		 * Enable support for Post Thumbnails on posts and pages.
+		 *
+		 * @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/
+		 */
+		add_theme_support( 'post-thumbnails' );
+
+		// This theme uses wp_nav_menu() in one location.
+		register_nav_menus( array(
+			'menu-1' => esc_html__( 'Primary', 'wordpress-learning' ),
+		) );
+
+		/*
+		 * Switch default core markup for search form, comment form, and comments
+		 * to output valid HTML5.
+		 */
+		add_theme_support( 'html5', array(
+			'search-form',
+			'comment-form',
+			'comment-list',
+			'gallery',
+			'caption',
+		) );
+
+		// Set up the WordPress core custom background feature.
+		add_theme_support( 'custom-background', apply_filters( 'wordpress_learning_custom_background_args', array(
+			'default-color' => 'ffffff',
+			'default-image' => '',
+		) ) );
+
+		// Add theme support for selective refresh for widgets.
+		add_theme_support( 'customize-selective-refresh-widgets' );
+
+		/**
+		 * Add support for core custom logo.
+		 *
+		 * @link https://codex.wordpress.org/Theme_Logo
+		 */
+		add_theme_support( 'custom-logo', array(
+			'height'      => 250,
+			'width'       => 250,
+			'flex-width'  => true,
+			'flex-height' => true,
+		) );
+	}
+endif;
+add_action( 'after_setup_theme', 'wordpress_learning_setup' );
+
+/**
+ * Set the content width in pixels, based on the theme's design and stylesheet.
+ *
+ * Priority 0 to make it available to lower priority callbacks.
+ *
+ * @global int $content_width
+ */
+function wordpress_learning_content_width() {
+	$GLOBALS['content_width'] = apply_filters( 'wordpress_learning_content_width', 640 );
+}
+add_action( 'after_setup_theme', 'wordpress_learning_content_width', 0 );
+
+/**
+ * Register widget area.
+ *
+ * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
+ */
+function wordpress_learning_widgets_init() {
+	register_sidebar( array(
+		'name'          => esc_html__( 'Sidebar', 'wordpress-learning' ),
+		'id'            => 'sidebar-1',
+		'description'   => esc_html__( 'Add widgets here.', 'wordpress-learning' ),
+		'before_widget' => '<section id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</section>',
+		'before_title'  => '<h2 class="widget-title">',
+		'after_title'   => '</h2>',
+	) );
+}
+add_action( 'widgets_init', 'wordpress_learning_widgets_init' );
+
+/**
+ * Enqueue scripts and styles.
+ */
+function wordpress_learning_scripts() {
+
+    wp_enqueue_style( 'bootstrap-css', get_template_directory_uri() . '/css/bootstrap.css' );
+	wp_enqueue_style( 'wordpress-learning-style', get_stylesheet_uri() );
+
+  	wp_enqueue_script( 'bootstrap-js', get_template_directory_uri() . '/js/bootstrap.js', array('jquery'), '4.1.3', true );
+	wp_enqueue_script( 'wordpress-learning-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
+	wp_enqueue_script( 'wordpress-learning-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
+	
+	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+		wp_enqueue_script( 'comment-reply' );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'wordpress_learning_scripts' );
+
+
+/**
+ * Load Jetpack compatibility file.
+ */
+if ( defined( 'JETPACK__VERSION' ) ) {
+	require get_template_directory() . '/inc/jetpack.php';
+}
+
+// 
+// Learning
+// 
+
+/*
+ *
+ * Redirect when theme is activated
+ * @link Screenshot - 
+ * @link - 
+ *
+ */
+if (is_admin() && isset($_GET['activated']) && $pagenow == "themes.php")
+	wp_redirect('themes.php?page=custompage');
+
+/*
+ *
+ * Check if admin is logged in or not and Show admin Bar
+ * @link Screenshot - 
+ * @link - 
+ *
+ */
+if ( is_admin() ) {
+ show_admin_bar( true );
+}
+
+/*
+ *
+ * Something when admin_bar is showing
+ * @link Screenshot - 
+ * @link - 
+ *
+ */
+if ( is_admin_bar_showing() ) {
+    // do something
+}
+
+/*
+ *
+ * Change WordPress Logo From admin Panel Top bar
+ * @link Screenshot - http://prntscr.com/h182at
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+function wpb_custom_logo() {
+echo '
+<style type="text/css">
+#wpadminbar #wp-admin-bar-wp-logo > .ab-item .ab-icon:before {
+background-image: url(' . get_bloginfo('stylesheet_directory') . '/images/custom-logo.png) !important;
+background-position: 0 0;
+color:rgba(0, 0, 0, 0);
+}
+#wpadminbar #wp-admin-bar-wp-logo.hover > .ab-item .ab-icon {
+background-position: 0 0;
+}
+</style>
+';
+}
+//hook into the administrative header output
+add_action('wp_before_admin_bar_render', 'wpb_custom_logo');
+
+/*
+ *
+ * Change WordPress From admin Panel Buttom 
+ * @link Screenshot - http://prntscr.com/gyu1qb
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+ function remove_footer_admin () {
+ 
+echo 'Fueled by <a href="http://www.wordpress.org" target="_blank">WordPress</a> | WordPress Tutorials: <a href="http://www.shivaaryal.com.np" target="_blank">Shiva</a></p>';
+ 
+}
+ 
+add_filter('admin_footer_text', 'remove_footer_admin');
+
+/*
+ *
+ * Add WordPress custom dashboard widget on admin Panel Home
+ * @link Screenshot - http://prntscr.com/h1836m
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+ add_action('wp_dashboard_setup', 'my_custom_dashboard_widgets');
+ 
+function my_custom_dashboard_widgets() {
+global $wp_meta_boxes;
+ 
+wp_add_dashboard_widget('custom_help_widget', 'Shiva Dashboard Widget', 'custom_dashboard_help');
+}
+ 
+function custom_dashboard_help() {
+echo '<p>Welcome to Custom Dashboard Widget! Need help? Contact the developer <a href="mailto:yourusername@gmail.com">here</a>. For WordPress Tutorials visit: <a href="http://www.wpbeginner.com" target="_blank">Shiva Aryal</a></p>';
+}
+
+/*
+ *
+ * Add WordPress custom Gravatar image(user_image) on admin Panel Home
+ * @link Screenshot - http://prntscr.com/gyu3xl
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+add_filter( 'avatar_defaults', 'wpb_new_gravatar' );
+function wpb_new_gravatar ($avatar_defaults) {
+$myavatar = 'http://example.com/wp-content/uploads/2017/01/wpb-default-gravatar.png';
+$avatar_defaults[$myavatar] = "Shiva Gravatar";
+return $avatar_defaults;
+}
+
+/*
+ *
+ * add a dynamic copyright date in WordPress footer
+ * @link Screenshot - http://prntscr.com/h185np
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+function wpb_copyright() {
+global $wpdb;
+$copyright_dates = $wpdb->get_results("
+SELECT
+YEAR(min(post_date_gmt)) AS firstdate,
+YEAR(max(post_date_gmt)) AS lastdate
+FROM
+$wpdb->posts
+WHERE
+post_status = 'publish'
+");
+$output = '';
+if($copyright_dates) {
+$copyright = "© " . $copyright_dates[0]->firstdate;
+if($copyright_dates[0]->firstdate != $copyright_dates[0]->lastdate) {
+$copyright .= '-' . $copyright_dates[0]->lastdate;
+}
+$output = $copyright;
+}
+return $output;
+}
+
+/*
+ *
+ * add extra fields to your author profiles in WordPress
+ * @link Screenshot - http://prntscr.com/gyu6cv 
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+function wpb_new_contactmethods( $contactmethods ) {
+// Add Twitter
+$contactmethods['twitter'] = 'Twitter';
+//add Facebook
+$contactmethods['facebook'] = 'Facebook';
+ 
+return $contactmethods;
+}
+add_filter('user_contactmethods','wpb_new_contactmethods',10,1);
+
+/*
+ *
+ * Change/Remove WordPress version from footer of admin panel WordPress
+ * @link Screenshot - http://prntscr.com/h17yap
+ * @link - https://raghunathgurjar.wordpress.com/2013/03/19/removeedit-wordpress-admin-footer-links-and-version-number/
+ *
+ */
+function change_footer_version(){
+	return 'No Version';
+}add_filter( 'update_footer', 'change_footer_version', 9999);
+
+/*
+ *
+ * randomly change background color on your WordPress upon each visit and page reload
+ * @link Screenshot - http://prntscr.com/h18a6o
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+ function wpb_bg() { 
+	$rand = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f');
+	$color ='#'.$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)].
+	$rand[rand(0,15)].$rand[rand(0,15)].$rand[rand(0,15)];
+	echo $color;
+}
+
+/*
+ *
+ * Hide Login Errors in WordPress
+ * @link Screenshot - http://prntscr.com/h18bgg
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+ function no_wordpress_errors(){
+  return 'Oe K xa Kina wrong id password haneko!';
+}
+add_filter( 'login_errors', 'no_wordpress_errors' );
+
+/*
+ *
+ * disable login by email in WordPress by adding this code to your functions file.
+ * @link Screenshot - http://prntscr.com/h18cvd
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */	
+remove_filter( 'authenticate', 'wp_authenticate_email_password', 20 );
+
+/*
+ *
+ * Function to return user count
+ * @link Screenshot - http://prntscr.com/h18kip
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+function wpb_user_count() { 
+$usercount = count_users();
+$result = $usercount['total_users']; 
+return $result; 
+} 
+// Creating a shortcode to display user count
+add_shortcode('user_count', 'wpb_user_count');
+
+/*
+ *
+ * Add Odd and Even CSS Classes to WordPress Posts
+ * @link Screenshot - http://prntscr.com/h18m3f
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+function oddeven_post_class ( $classes ) {
+   global $current_class;
+   $classes[] = $current_class;
+   $current_class = ($current_class == 'odd') ? 'even' : 'odd';
+   return $classes;
+}
+add_filter ( 'post_class' , 'oddeven_post_class' );
+global $current_class;
+$current_class = 'odd';
+
+/*
+ *
+ * Remove Default Image Links in WordPress
+ * @link Screenshot - http://cdn2.wpbeginner.com/wp-content/uploads/2017/02/linkdisabled.png
+ * @link - http://www.wpbeginner.com/wp-tutorials/25-extremely-useful-tricks-for-the-wordpress-functions-file/
+ *
+ */
+function wpb_imagelink_setup() {
+    $image_set = get_option( 'image_default_link_type' );
+     
+    if ($image_set !== 'none') {
+        update_option('image_default_link_type', 'none');
+    }
+}
+add_action('admin_init', 'wpb_imagelink_setup', 10);
+
+/*
+ *
+ * custom admin login logo
+ * @link Screenshot - http://prntscr.com/h18srm
+ * @link - https://digwp.com/2010/03/wordpress-functions-php-template-custom-functions/
+ *
+ */ 
+function custom_login_logo() {
+	echo '<style type="text/css">
+	h1 a { background-image: url('.get_bloginfo('template_directory').'/images/custom-logo.png) !important; }
+	</style>';
+}
+add_action('login_head', 'custom_login_logo');
+
+/*
+ *
+ * Make a url clickable
+ * @link Screenshot - http://prntscr.com/h19va7
+ * @link - 
+ *
+ */ 
+add_filter('the_content', 'make_clickable');
+
+/*
+ *
+ * set the last login date
+ * @link Screenshot - 
+ * @link - http://wpsnipp.com/index.php/date/capture-users-last-login-date-and-time/
+ *
+ */ 
+add_action('wp_login','wpsnipp_set_last_login', 0, 2);
+function wpsnipp_set_last_login($login, $user) {
+    $user = get_user_by('login',$login);
+    $time = current_time( 'timestamp' );
+    $last_login = get_user_meta( $user->ID, '_last_login', 'true' );
+    if(!$last_login){
+    update_usermeta( $user->ID, '_last_login', $time );
+    }else{
+    update_usermeta( $user->ID, '_last_login_prev', $last_login );
+    update_usermeta( $user->ID, '_last_login', $time );
+    }
+}
+// get last login date
+function wpsnipp_get_last_login($user_id,$prev=null){
+  $last_login = get_user_meta($user_id);
+  $time = current_time( 'timestamp' );
+  if(isset($last_login['_last_login_prev'][0]) && $prev){
+          $last_login = get_user_meta($user_id, '_last_login_prev', 'true' );
+  }else if(isset($last_login['_last_login'][0])){
+          $last_login = get_user_meta($user_id, '_last_login', 'true' );
+  }else{
+    update_usermeta( $user_id, '_last_login', $time );
+    $last_login = $last_login['_last_login'][0];
+  }
+  return $last_login;
+}
+
+/*
+ *
+ * Track post views without a plugin using post meta
+ * @link Screenshot - 
+ * @link - http://wpsnipp.com/index.php/cache/track-post-views-without-a-plugin-using-post-meta/
+ *
+ */
+function getPostViews($postID){
+    $count_key = 'post_views_count';
+    $count = get_post_meta($postID, $count_key, true);
+    if($count==''){
+        delete_post_meta($postID, $count_key);
+        add_post_meta($postID, $count_key, '0');
+        return "0 View";
+    }
+    return $count.' Views';
+}
+function setPostViews($postID) {
+    $count_key = 'post_views_count';
+    $count = get_post_meta($postID, $count_key, true);
+    if($count==''){
+        $count = 0;
+        delete_post_meta($postID, $count_key);
+        add_post_meta($postID, $count_key, '0');
+    }else{
+        $count++;
+        update_post_meta($postID, $count_key, $count);
+    }
+}
+// Remove issues with prefetching adding extra views
+remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0);
+
+/*
+ *
+ * Get all the setting options also just enter "your-site.com/wp-admin/options.php for eg:- http://localhost/wordpress-learning/wp-admin/options.php"
+ * @link Screenshot - 
+ * @link - https://wordpress.stackexchange.com/a/1614
+ *
+ */
+function all_settings_link() {
+    add_options_page(__('All Settings'), __('All Settings'), 'administrator', 'options.php');
+}add_action('admin_menu', 'all_settings_link');
+
+
+/*
+ *
+ * Add Thumbnails in Manage Posts/Pages List
+ * @link Screenshot - 
+ * @link - https://wordpress.stackexchange.com/a/6021
+ *
+ */
+if ( !function_exists('AddThumbColumn') && function_exists('add_theme_support') ) {
+
+    // for post and page
+    add_theme_support('post-thumbnails', array( 'post', 'page' ) );
+
+    function AddThumbColumn($cols) {
+
+        $cols['thumbnail'] = __('Thumbnail');
+
+        return $cols;
+    }
+
+    function AddThumbValue($column_name, $post_id) {
+
+            $width = (int) 35;
+            $height = (int) 35;
+
+            if ( 'thumbnail' == $column_name ) {
+                // thumbnail of WP 2.9
+                $thumbnail_id = get_post_meta( $post_id, '_thumbnail_id', true );
+                // image from gallery
+                $attachments = get_children( array('post_parent' => $post_id, 'post_type' => 'attachment', 'post_mime_type' => 'image') );
+                if ($thumbnail_id)
+                    $thumb = wp_get_attachment_image( $thumbnail_id, array($width, $height), true );
+                elseif ($attachments) {
+                    foreach ( $attachments as $attachment_id => $attachment ) {
+                        $thumb = wp_get_attachment_image( $attachment_id, array($width, $height), true );
+                    }
+                }
+                    if ( isset($thumb) && $thumb ) {
+                        echo $thumb;
+                    } else {
+                        echo __('None');
+                    }
+            }
+    }
+
+    // for posts
+    add_filter( 'manage_posts_columns', 'AddThumbColumn' );
+    add_action( 'manage_posts_custom_column', 'AddThumbValue', 10, 2 );
+
+    // for pages
+    add_filter( 'manage_pages_columns', 'AddThumbColumn' );
+    add_action( 'manage_pages_custom_column', 'AddThumbValue', 10, 2 );
+}
+
+/*
+ *
+ * unregister all default WP Widgets
+ * @link Screenshot - 
+ * @link - https://wordpress.stackexchange.com/a/6021
+ *
+ */ 
+function unregister_default_wp_widgets() {
+    unregister_widget('WP_Widget_Pages');
+    unregister_widget('WP_Widget_Calendar');
+    unregister_widget('WP_Widget_Archives');
+    unregister_widget('WP_Widget_Links');
+    unregister_widget('WP_Widget_Meta');
+    unregister_widget('WP_Widget_Search');
+    unregister_widget('WP_Widget_Text');
+    unregister_widget('WP_Widget_Categories');
+    unregister_widget('WP_Widget_Recent_Posts');
+    unregister_widget('WP_Widget_Recent_Comments');
+    unregister_widget('WP_Widget_RSS');
+    unregister_widget('WP_Widget_Tag_Cloud');
+}
+add_action('widgets_init', 'unregister_default_wp_widgets', 1);
+
+/*
+ *
+ * Customize admin message "Howdy" to "Welcome"
+ * @link Screenshot - 
+ * @link - https://wordpress.stackexchange.com/a/6022
+ *
+ */ 
+//  Method 1: 
+function howdy_message($translated_text, $text, $domain) {
+$new_message = str_replace('Howdy', 'welcome', $text);
+return $new_message;
+}
+add_filter('gettext', 'howdy_message', 10, 3);
+     
+//  Method 2 howdey to welcome:
+$nohowdy = "Welcome";
+
+if (is_admin()) {
+    add_action('init', 'artdev_nohowdy_h');
+    add_action('admin_footer', 'artdev_nohowdy_f');
+}
+// Load jQuery
+function artdev_nohowdy_h() {
+    wp_enqueue_script('jquery');
+}
+// Modify
+function artdev_nohowdy_f() {
+global $nohowdy;
+echo <<<JS
+<script type="text/javascript">
+//<![CDATA[
+var nohowdy = "$nohowdy";
+jQuery('#user_info p')
+    .html(
+    jQuery('#user_info p')
+        .html()
+        .replace(/Howdy/,nohowdy)
+    );
+//]]>
+JS;
+}
+add_filter('gettext', 'change_howdy', 10, 3);
+
+function change_howdy($translated, $text, $domain) {
+
+    if (!is_admin() || 'default' != $domain)
+        return $translated;
+
+    if (false !== strpos($translated, 'Howdy'))
+        return str_replace('Howdy', 'Welcome', $translated);
+
+    return $translated;
+}
+
+/*
+ *
+ * Tweet
+ * @link Screenshot - 
+ * @link - 
+ *
+ */ 
+function shreplz() {
+   return '
+    <div class="sharebox">
+    <div class="twittme"><a href="https://twitter.com/share" class="twitter-share-button" data-count="horizontal">Tweet</a><script type="text/javascript" src="//platform.twitter.com/widgets.js"></script></div>
+    <br style="clear: left;" />
+    </div>
+   ';
+}
+add_shortcode('sharethis', 'shreplz');
+
+/*
+ *
+ * 
+ * @ Display Page template on Pages - http://prntscr.com/jh7a1g
+ * @Display Post State for pages in WP Admin
+ *
+ */ 
+if( ! function_exists( 'wordpress_learning_post_states' ) ) :
+
+function wordpress_learning_post_states( $post_states, $post ){
+    if( 'page' == get_post_type( $post->ID ) ){
+        if( get_page_template_slug( $post->ID ) == 'template-home.php' ) $post_states[] = esc_html__( 'Home Page', 'blossom-coach-pro' );
+    }
+    return $post_states; 
+}
+endif;
+
+add_filter( 'display_post_states', 'wordpress_learning_post_states', 10, 2 );
+
+/*
+ *
+ * Add text above the featured image on Admin
+ * @link Screenshot - http://prntscr.com/kwx927
+ * @link - https://developer.wordpress.org/reference/hooks/admin_post_thumbnail_html/
+ *
+ */ 
+function filter_featured_image_admin_text( $content, $post_id, $thumbnail_id ){
+    $help_text = '<p>' . __( 'Please use an image that is 1170 pixels wide x 658 pixels tall.', 'my_domain' ) . '</p>';
+    return $help_text . $content;
+}
+add_filter( 'admin_post_thumbnail_html', 'filter_featured_image_admin_text', 10, 3 );
+
+/*
+ *
+ * Add featured image from URL on Admin
+ * @link Screenshot - http://prntscr.com/kwxasj
+ * @link - https://wordpress.stackexchange.com/questions/158491/is-it-possible-set-a-featured-image-with-external-image-url
+ *
+ */
+function url_is_image( $url ) {
+    if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+        return FALSE;
+    }
+    $ext = array( 'jpeg', 'jpg', 'gif', 'png' );
+    $info = (array) pathinfo( parse_url( $url, PHP_URL_PATH ) );
+    return isset( $info['extension'] )
+        && in_array( strtolower( $info['extension'] ), $ext, TRUE );
+}
+
+function thumbnail_url_field( $html ) {
+    global $post;
+    $value = get_post_meta( $post->ID, '_thumbnail_ext_url', TRUE ) ? : "";
+    $nonce = wp_create_nonce( 'thumbnail_ext_url_' . $post->ID . get_current_blog_id() );
+    $html .= '<input type="hidden" name="thumbnail_ext_url_nonce" value="' 
+        . esc_attr( $nonce ) . '">';
+    $html .= '<div><p>' . __('Or', 'wordpress-learning') . '</p>';
+    $html .= '<p>' . __( 'Enter the url for external image', 'wordpress-learning' ) . '</p>';
+    $html .= '<p><input type="url" name="thumbnail_ext_url" value="' . $value . '"></p>';
+    if ( ! empty($value) && url_is_image( $value ) ) {
+        $html .= '<p><img style="max-width:150px;height:auto;" src="' 
+            . esc_url($value) . '"></p>';
+        $html .= '<p>' . __( 'Leave url blank to remove.', 'wordpress-learning' ) . '</p>';
+    }
+    $html .= '</div>';
+    return $html;
+}
+
+add_filter( 'admin_post_thumbnail_html', 'thumbnail_url_field' );
+
+add_action( 'save_post', 'thumbnail_url_field_save', 10, 2 );
+
+add_filter( 'post_thumbnail_html', 'thumbnail_external_replace', 10, PHP_INT_MAX );
+
+// Save image
+function thumbnail_url_field_save( $pid, $post ) {
+    $cap = $post->post_type === 'page' ? 'edit_page' : 'edit_post';
+    if (
+        ! current_user_can( $cap, $pid )
+        || ! post_type_supports( $post->post_type, 'thumbnail' )
+        || defined( 'DOING_AUTOSAVE' )
+    ) {
+        return;
+    }
+    $action = 'thumbnail_ext_url_' . $pid . get_current_blog_id();
+    $nonce = filter_input( INPUT_POST, 'thumbnail_ext_url_nonce', FILTER_SANITIZE_STRING );
+    $url = filter_input( INPUT_POST,  'thumbnail_ext_url', FILTER_VALIDATE_URL );
+    if (
+        empty( $nonce )
+        || ! wp_verify_nonce( $nonce, $action )
+        || ( ! empty( $url ) && ! url_is_image( $url ) )
+    ) {
+        return;
+    }
+    if ( ! empty( $url ) ) {
+        update_post_meta( $pid, '_thumbnail_ext_url', esc_url($url) );
+        if ( ! get_post_meta( $pid, '_thumbnail_id', TRUE ) ) {
+            update_post_meta( $pid, '_thumbnail_id', 'by_url' );
+        }
+    } elseif ( get_post_meta( $pid, '_thumbnail_ext_url', TRUE ) ) {
+        delete_post_meta( $pid, '_thumbnail_ext_url' );
+        if ( get_post_meta( $pid, '_thumbnail_id', TRUE ) === 'by_url' ) {
+            delete_post_meta( $pid, '_thumbnail_id' );
+        }
+    }
+}
+
+// Replace by featured image
+function thumbnail_external_replace( $html, $post_id ) {
+    $url =  get_post_meta( $post_id, '_thumbnail_ext_url', TRUE );
+    if ( empty( $url ) || ! url_is_image( $url ) ) {
+        return $html;
+    }
+    $alt = get_post_field( 'post_title', $post_id ) . ' ' .  __( 'thumbnail', 'txtdomain' );
+    $attr = array( 'alt' => $alt );
+    $attr = apply_filters( 'wp_get_attachment_image_attributes', $attr, NULL );
+    $attr = array_map( 'esc_attr', $attr );
+    $html = sprintf( '<img src="%s"', esc_url($url) );
+    foreach ( $attr as $name => $value ) {
+        $html .= " $name=" . '"' . $value . '"';
+    }
+    $html .= ' />';
+    return $html;
+}
